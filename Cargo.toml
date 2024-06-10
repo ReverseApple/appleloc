@@ -13,6 +13,3 @@ edition = "2021"
 thiserror = "1.0.61"
 protobuf = "3.4.0"
 reqwest = { features = ["blocking"], version = "0.12.4" }
-
-[build-dependencies]
-protobuf-codegen = "3.4.0"
