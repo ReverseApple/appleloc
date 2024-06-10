@@ -1,7 +1,13 @@
 [package]
 name = "appleloc"
 version = "0.1.0"
+description = "Crate for accessing Apple's internal geolocation API service."
+license = "MIT"
+homepage = "https://github.com/AngeloD2022/appleloc"
+repository = "https://github.com/AngeloD2022/appleloc"
+readme = "README.md"
 edition = "2021"
+
 
 [dependencies]
 thiserror = "1.0.61"
