@@ -3,7 +3,7 @@ use prost::Message;
 use protobuf::Payload;
 use thiserror::Error;
 
-use crate::constants::{API_ENDPOINT, COORD_ERROR, USER_AGENT};
+use crate::constants::{API_ENDPOINT, USER_AGENT};
 use crate::Error::{BssidNotFound, QueryError};
 
 mod constants;
