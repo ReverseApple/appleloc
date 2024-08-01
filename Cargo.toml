@@ -13,6 +13,7 @@ edition = "2021"
 thiserror = "1.0.61"
 reqwest = { features = ["blocking"], version = "0.12.4" }
 prost = "0.13.1"
+mac6 = "1.0.0"
 
 [build-dependencies]
 prost-build = "0.13.1"

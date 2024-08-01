@@ -1,3 +1,4 @@
+use mac6::Mac;
 use prost::Message;
 use protobuf::Payload;
 use thiserror::Error;
@@ -25,7 +26,7 @@ fn coord(coord: i64) -> f64 {
     coord as f64 * 1e-8
 }
 
-fn create_payload(bssids: &[&str]) -> Vec<u8> {
+fn create_payload(bssids: &[Mac]) -> Vec<u8> {
     let proto = protobuf::Payload {
         wifis: bssids
             .into_iter()
@@ -76,19 +77,22 @@ fn send(payload: &[u8]) -> Result<Payload, Error> {
 }
 
 pub fn basic_location(bssid: &str) -> Result<(f64, f64), Error> {
-    let payload = create_payload(&[bssid]);
+    let mac = bssid
+        .parse()
+        .map_err(|_| Error::QueryError("Invalid MAC address".to_string()))?;
+    let payload = create_payload(&[mac]);
 
     let response = send(&payload)?;
 
     if response.wifis.len() == 0 {
-        return Err(BssidNotFound(bssid.to_string()));
+        return Err(BssidNotFound(mac.to_string()));
     }
 
     let location = response.wifis[0]
         .location
         .expect("response must have a location value");
     if location.latitude as u64 == COORD_ERROR {
-        return Err(BssidNotFound(bssid.to_string()));
+        return Err(BssidNotFound(mac.to_string()));
     }
 
     let lat = coord(location.latitude);
