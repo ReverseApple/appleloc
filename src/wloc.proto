@@ -1,0 +1,22 @@
+// https://github.com/acheong08/apple-corelocation-experiments/blob/main/pb/BSSIDApple.proto
+
+syntax = "proto3";
+
+package wloc;
+
+message Payload {
+  repeated WiFi wifis = 2;
+}
+
+message WiFi {
+  string bssid = 1;
+  optional Location location = 2;
+}
+
+message Location {
+  int64 latitude = 1;
+  int64 longitude = 2;
+  // int64 horizontal_accuracy = 3;
+  // optional int64 altitude = 5;
+  // optional int64 vertical_accuracy = 6;
+}
