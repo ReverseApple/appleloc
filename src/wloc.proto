@@ -16,7 +16,7 @@ message WiFi {
 message Location {
   int64 latitude = 1;
   int64 longitude = 2;
-  // int64 horizontal_accuracy = 3;
-  // optional int64 altitude = 5;
-  // optional int64 vertical_accuracy = 6;
+  int64 accuracy = 3;
+  int64 altitude = 5;
+  int64 altitude_accuracy = 6;
 }

@@ -21,6 +21,32 @@ pub enum Error {
     QueryError(String),
 }
 
+struct Location {
+    latitude: f64,
+    longitude: f64,
+    accuracy: i64,
+    altitude: i64,
+    altitude_accuracy: i64,
+}
+
+impl Location {
+    fn from_proto(proto: protobuf::Location) -> Option<Self> {
+        let (lat, lon) = (proto.latitude, proto.longitude);
+        if lat == -18000000000 {
+            None
+        } else {
+            let (latitude, longitude) = (coord(lat), coord(lon));
+            Some(Self {
+                latitude,
+                longitude,
+                accuracy: proto.accuracy,
+                altitude: proto.altitude,
+                altitude_accuracy: proto.altitude_accuracy,
+            })
+        }
+    }
+}
+
 #[inline(always)]
 fn coord(coord: i64) -> f64 {
     coord as f64 * 1e-8
@@ -54,7 +80,7 @@ fn create_payload(bssids: &[Mac]) -> Vec<u8> {
     payload
 }
 
-fn send(payload: &[u8]) -> Result<Payload, Error> {
+fn send(payload: &[u8]) -> Result<Vec<(Mac, Option<Location>)>, Error> {
     let client = reqwest::blocking::Client::new();
 
     let http_res = client
@@ -73,7 +99,18 @@ fn send(payload: &[u8]) -> Result<Payload, Error> {
 
     let response =
         Payload::decode(&resp_bytes.to_vec().as_slice()[10..]).expect("Failed to parse response.");
-    Ok(response)
+
+    Ok(response
+        .wifis
+        .into_iter()
+        .map(|x| {
+            // TODO: handle parsing failures gracefully
+            let mac = x.bssid.parse().unwrap();
+            let loc =
+                Location::from_proto(x.location.expect("Response should include location field"));
+            (mac, loc)
+        })
+        .collect())
 }
 
 pub fn basic_location(bssid: &str) -> Result<(f64, f64), Error> {
@@ -82,21 +119,15 @@ pub fn basic_location(bssid: &str) -> Result<(f64, f64), Error> {
         .map_err(|_| Error::QueryError("Invalid MAC address".to_string()))?;
     let payload = create_payload(&[mac]);
 
-    let response = send(&payload)?;
+    let locs = send(&payload)?;
 
-    if response.wifis.len() == 0 {
-        return Err(BssidNotFound(mac.to_string()));
+    if locs.len() == 0 {
+        panic!("server did not respond with any data")
     }
 
-    let location = response.wifis[0]
-        .location
-        .expect("response must have a location value");
-    if location.latitude as u64 == COORD_ERROR {
-        return Err(BssidNotFound(mac.to_string()));
+    if let Some(loc) = &locs[0].1 {
+        Ok((loc.latitude, loc.longitude))
+    } else {
+        Err(BssidNotFound(mac.to_string()))
     }
-
-    let lat = coord(location.latitude);
-    let long = coord(location.longitude);
-
-    Ok((lat, long))
 }
