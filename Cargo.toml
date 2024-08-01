@@ -17,3 +17,6 @@ mac6 = "1.0.0"
 
 [build-dependencies]
 prost-build = "0.13.1"
+
+[[example]]
+name = "query"
