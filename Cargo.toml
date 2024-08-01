@@ -2,7 +2,7 @@
 name = "appleloc"
 version = "0.0.5"
 description = "Crate for accessing Apple's internal geolocation API service."
-license = "MIT"
+license = "GPL-3.0"
 homepage = "https://github.com/AngeloD2022/appleloc"
 repository = "https://github.com/AngeloD2022/appleloc"
 readme = "README.md"
